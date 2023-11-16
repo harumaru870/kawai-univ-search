@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>学校情報検索</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <script>
+    function updateDepartments() {
+            var school = document.getElementById('schoolName').value;
+            if (school) {
+                google.script.run.withSuccessHandler(populateDepartments).getDepartments(school);
+            }
+        }
+
+        function populateDepartments(departments) {
+            var departmentSelect = document.getElementById('department');
+            departmentSelect.innerHTML = '<option value="">学部を選択</option>';
+            departments.forEach(function(department) {
+                var option = document.createElement('option');
+                option.value = department;
+                option.textContent = department;
+                departmentSelect.appendChild(option);
+            });
+        }
+
+        function updateMajors() {
+            var school = document.getElementById('schoolName').value;
+            var department = document.getElementById('department').value;
+            if (school && department) {
+                google.script.run.withSuccessHandler(populateMajors).getMajors(school, department);
+            }
+        }
+
+        function populateMajors(majors) {
+            var majorSelect = document.getElementById('major');
+            majorSelect.innerHTML = '<option value="">学科を選択</option>';
+            majors.forEach(function(major) {
+                var option = document.createElement('option');
+                option.value = major;
+                option.textContent = major;
+                majorSelect.appendChild(option);
+            });
+        }
+
+        function updateDepartments() {
+    var school = document.getElementById('schoolName').value;
+    if (school) {
+        google.script.run.withSuccessHandler(populateDepartments).getDepartments(school);
+    } else {
+        // 学校名がない場合は学部のプルダウンをリセット
+        document.getElementById('department').innerHTML = '<option value="">学部を選択</option>';
+    }
+}
+
+        function populateExamDates(examDates) {
+            var examDateSelect = document.getElementById('examDate');
+            examDateSelect.innerHTML = '<option value="">入試日程を選択</option>';
+            examDates.forEach(function(examDate) {
+                var option = document.createElement('option');
+                option.value = examDate;
+                option.textContent = examDate;
+                examDateSelect.appendChild(option);
+            });
+        }
+
+        function showID() {
+            var school = document.getElementById('schoolName').value;
+            var department = document.getElementById('department').value;
+            var major = document.getElementById('major').value;
+            var examDate = document.getElementById('examDate').value;
+            if (school && department && major && examDate) {
+                google.script.run.withSuccessHandler(displayID).getID(school, department, major, examDate);
+            }
+        }
+
+        function displayID(id) {
+            document.getElementById('idDisplay').textContent = id;
+        }
+
+        function addSchool() {
+            var school = document.getElementById('schoolName').value;
+            var department = document.getElementById('department').value;
+            var major = document.getElementById('major').value;
+            var examDate = document.getElementById('examDate').value;
+            var id = document.getElementById('idDisplay').textContent;
+
+            if (school && department && major && examDate && id) {
+                var schoolList = document.getElementById('schoolList');
+                var listItem = document.createElement('li');
+                listItem.textContent = '学校名: ' + school + ', 学部: ' + department + ', 学科: ' + major + ', 入試日程: ' + examDate + ', ID: ' + id;
+                schoolList.appendChild(listItem);
+
+                // フォームをリセット
+                resetForm();
+            } else {
+                alert('全ての情報を入力してください');
+            }
+        }
+
+        function resetForm() {
+    var schoolName = document.getElementById('schoolName').value;
+    document.getElementById('department').innerHTML = '<option value="">学部を選択</option>';
+    document.getElementById('major').innerHTML = '<option value="">学科を選択</option>';
+    document.getElementById('examDate').innerHTML = '<option value="">入試日程を選択</option>';
+    document.getElementById('idDisplay').textContent = '';
+
+    if (schoolName) {
+        updateDepartments(); // 学校名があれば学部のプルダウンを更新
+    }
+}
+function updateExamDates() {
+    var school = document.getElementById('schoolName').value;
+    var department = document.getElementById('department').value;
+    var major = document.getElementById('major').value;
+    if (school && department && major) {
+        google.script.run.withSuccessHandler(populateExamDates).getExamDates(school, department, major);
+    } else {
+        // 必要なフィールドが欠けている場合は、入試日程のプルダウンをリセット
+        document.getElementById('examDate').innerHTML = '<option value="">入試日程を選択</option>';
+    }
+}
+function searchSchools() {
+            var school = document.getElementById('schoolName').value;
+            if (school) {
+                updateDepartments(); // 学校名に基づいて学部を更新
+            } else {
+                alert('学校名を入力してください');
+            }
+        }
+  </script>
+</head>
+<body>
+  <div class="container mt-3">
+    <h1 style="text-align: center; margin-bottom: 20px;">河合塾コード検索システム</h1>
+    <p style="text-align: center;">注意書き: 空欄のものはなしと表記しています。 データが多いので動作が遅いです。 IDが表示されてから追加を押してください。 </p>
+    <div class="form-group"> 学校名: <input type="text" id="schoolName" class="form-control"> <button onclick="searchSchools()" class="btn btn-primary mt-2">決定</button> </div>
+    <div class="form-group"> 学部: <select id="department" onchange="updateMajors()" class="form-control"><option value="">学部を選択</option></select> </div>
+    <div class="form-group"> 学科: <select id="major" onchange="updateExamDates()" class="form-control"><option value="">学科を選択</option></select> </div>
+    <div class="form-group"> 入試日程: <select id="examDate" onchange="showID()" class="form-control"><option value="">入試日程を選択</option></select> </div>
+    <div>ID: <span id="idDisplay" style="font-size: 1.5em;"></span></div> <button onclick="addSchool()" class="btn btn-success">追加</button>
+    <ul id="schoolList" class="list-group mt-3"></ul>
+  </div>
+  <footer class="container mt-4">
+    <p style="text-align: center;">&copy; <span id="currentYear"></span> HARU</p>
+  </footer>
+  <!-- Bootstrap JavaScript and Popper.js (Optional) -->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  <script>
+    // Set the current year in the footer
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
